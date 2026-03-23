@@ -72,7 +72,7 @@ static bool	isLeapYear(int year)
 
 static void dateAccept(std::stringstream &stream, char c)
 {
-	int	i;
+	char	i;
 	if (stream.peek() == c)
 		stream >> i;
 	else
@@ -111,10 +111,11 @@ static void	dateCheck(std::stringstream& date)
 		throw BitCoinExchange::InvalidDateException();
 }
 
-static void	close_db_and_print_error(std::ifstream &db, const std::string& msg)
+static void	db_error(std::ifstream &db, const std::string& msg,
+		int line_nr)
 {
 		db.close();
-		std::cerr << "BCE :" << msg << std::endl;
+		std::cerr << "BCE :" << msg << " line " << line_nr << std::endl;
 }
 
 
@@ -128,8 +129,9 @@ BitCoinExchange::BitCoinExchange()
 BitCoinExchange::~BitCoinExchange()
 { }
 BitCoinExchange::BitCoinExchange(const BitCoinExchange& other):
-	_hash(other._hash), _database_name(other._database_name),
-	_input_name(other._input_name)
+	_hash(other._hash),
+	_input_name(other._input_name),
+	 _database_name(other._database_name)
 { }
 
 BitCoinExchange& BitCoinExchange::operator=(const BitCoinExchange& other)
