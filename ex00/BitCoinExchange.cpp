@@ -3,7 +3,7 @@
 #include <sstream>
 #include <fstream>
 
-static void	dateCheck(std::stringstream& date);
+static int	dateCheck(std::stringstream& date);
 static void dateAccept(std::stringstream &stream, char c);
 static void	db_error(std::ifstream &db, const std::string& msg,
 		int line_nr);
@@ -34,10 +34,11 @@ bool	BitCoinExchange::initDatabase()
 	{
 		line_nr++;
 		std::stringstream	inner(line);
+		int					converted_date;
 		double			 	price;
 		try
         {
-			dateCheck(inner);
+			converted_date = dateCheck(inner);
 			dateAccept(inner, ',');
 		}
 		catch (InvalidDateException &e) {
@@ -48,17 +49,12 @@ bool	BitCoinExchange::initDatabase()
 		}
 
 		inner >> price;
-		if (price < 0)
+		if (price < 0 || inner.fail())
 			return (
-				db_error(database, "Database prices cannot be negative", line_nr),
+				db_error(database, "Invalid database price", line_nr),
 				false
 			);
-
-		// This is because dates can be valid but different sizes
-		// 2002-9-3 instead of 2002-09-03
-		int comma_pos = line.find(",");
-		line = line.substr(comma_pos);
-		_hash.insert(std::pair<std::string, int>(line, price));
+		_hash.insert(std::pair<int, int>(converted_date, price));
 	}
 	database.close();
 	return (true);
@@ -79,7 +75,7 @@ static void dateAccept(std::stringstream &stream, char c)
 		throw BitCoinExchange::InvalidDateException();
 }
 
-static void	dateCheck(std::stringstream& date)
+static int	dateCheck(std::stringstream& date)
 {
 	static int valid_months_normal[12] =
 		{31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
@@ -109,6 +105,7 @@ static void	dateCheck(std::stringstream& date)
 		check = valid_months_normal;
 	if (day < 1 || day > check[month - 1])
 		throw BitCoinExchange::InvalidDateException();
+	return (day + month * 100 + year * 100 * 100);
 }
 
 static void	db_error(std::ifstream &db, const std::string& msg,

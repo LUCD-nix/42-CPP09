@@ -6,9 +6,9 @@
 class BitCoinExchange
 {
 	private :
-		std::map<std::string, int>	_hash;
-		const std::string			_input_name;
-		const std::string			_database_name;
+		std::map<int, int>	_hash;
+		const std::string	_input_name;
+		const std::string	_database_name;
 
 	public :
 		// BEGIN ORTHODOX CANNONICAL FORM
