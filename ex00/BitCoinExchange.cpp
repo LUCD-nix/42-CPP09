@@ -3,6 +3,67 @@
 #include <sstream>
 #include <fstream>
 
+static void	dateCheck(std::stringstream& date);
+static void dateAccept(std::stringstream &stream, char c);
+static void	db_error(std::ifstream &db, const std::string& msg,
+		int line_nr);
+static bool	isLeapYear(int year);
+
+bool	BitCoinExchange::initDatabase()
+{
+	std::ifstream	database;
+	std::string		line;
+	int				line_nr;
+
+	// TODO : we might want to factor db name out of the class
+	database.open(_database_name.c_str());
+	if (database.fail())
+	{
+		std::cerr << "BCE : Missing or invalid database!" << std::endl;
+		return (false);
+	}
+	line_nr = 1;
+	std::getline(database, line);
+	if (line != "date,exchange_rate")
+		return (
+			db_error(database, "Unexpected beginning of database", line_nr),
+			false
+		);
+	// TODO : refactor while into readEntireFile or similar (also used later)
+	while (std::getline(database, line))
+	{
+		line_nr++;
+		std::stringstream	inner(line);
+		double			 	price;
+		try
+        {
+			dateCheck(inner);
+			dateAccept(inner, ',');
+		}
+		catch (InvalidDateException &e) {
+			return (
+				db_error(database, "Invalid date format in database!", line_nr),
+				false
+			);
+		}
+
+		inner >> price;
+		if (price < 0)
+			return (
+				db_error(database, "Database prices cannot be negative", line_nr),
+				false
+			);
+
+		// This is because dates can be valid but different sizes
+		// 2002-9-3 instead of 2002-09-03
+		int comma_pos = line.find(",");
+		line = line.substr(comma_pos);
+		_hash.insert(std::pair<std::string, int>(line, price));
+	}
+	database.close();
+	return (true);
+}
+
 static bool	isLeapYear(int year)
 {
 	return ((year % 4 == 0)
@@ -50,50 +111,12 @@ static void	dateCheck(std::stringstream& date)
 		throw BitCoinExchange::InvalidDateException();
 }
 
-bool	BitCoinExchange::initDatabase()
+static void	close_db_and_print_error(std::ifstream &db, const std::string& msg)
 {
-	std::ifstream	database;
-	std::string		line;
-
-	// TODO : we might want to factor db name out of the class
-	database.open(_database_name.c_str());
-	if (database.fail())
-	{
-		std::cerr << "BCE : Missing or invalid database!" << std::endl;
-		return (false);
-	}
-	// TODO : refactor while into readEntireFile or similar (also used later)
-	// TODO : skip/process first line
-	while (std::getline(database, line))
-	{
-		std::stringstream	inner(line);
-		double			 	price;
-		try {
-			dateCheck(inner);
-			dateAccept(inner, ',');
-		}
-		catch (InvalidDateException &e) {
-			database.close();
-			std::cerr << "BCE : Invalid date format in database!" << std::endl;
-			return (false);
-		}
-
-		inner >> price;
-		if (price < 0)
-		{
-			database.close();
-			std::cerr << "BCE : Database price cannot be negative" << std::endl;
-			return (false);
-		}
-
-		// TODO : this can fail if date is valid but of different size: 
-		// 2002-9-3 instead of 2002-09-03, consider fixing
-		line = line.substr(10);
-		_hash.insert(std::pair(line, price));
-	}
-	database.close();
-	return (true);
+		db.close();
+		std::cerr << "BCE :" << msg << std::endl;
 }
+
 
 BitCoinExchange::BitCoinExchange(std::string input, std::string data):
 	_hash(), _input_name(input), _database_name(data)
