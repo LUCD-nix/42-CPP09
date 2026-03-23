@@ -26,5 +26,6 @@ class BitCoinExchange
 		};
 		BitCoinExchange(std::string _input_name, std::string _database_name);
 		bool	initDatabase();
+		void	processInput();
 };
 #endif // BITCOINEXCHANGE_HPP

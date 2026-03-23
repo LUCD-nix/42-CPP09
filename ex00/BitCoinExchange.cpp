@@ -7,7 +7,75 @@ static int	dateCheck(std::stringstream& date);
 static void dateAccept(std::stringstream &stream, char c);
 static void	db_error(std::ifstream &db, const std::string& msg,
 		int line_nr);
+static void	input_error(std::string& line, const std::string& msg,
+		int line_nr);
 static bool	isLeapYear(int year);
+static void	printHoldings(std::map<int, float>& map, int date, float btc);
+
+void	BitCoinExchange::processInput()
+{
+	std::ifstream	input;
+	std::string		line;
+	int				line_nr;
+
+	// expected format :
+	// YYYY-MM-DD | value
+	input.open(_input_name.c_str());
+	if (input.fail())
+	{
+		std::cerr << "BCE : Missing or invalid input!" << std::endl;
+		return ;
+	}
+	line_nr = 1;
+	std::getline(input, line);
+	if (line != "date | value")
+	{
+		std::cerr << "Error : Invalid first line in input" << std::endl;
+		input.close();
+		return ;
+	}
+	while (std::getline(input, line))
+	{
+		line_nr++;
+		std::stringstream	inner(line);
+		int					converted_date;
+		double				amount;
+		try
+        {
+			converted_date = dateCheck(inner);
+			// disgusTANG
+			dateAccept(inner, ' ');
+			dateAccept(inner, '|');
+			dateAccept(inner, ' ');
+		}
+		catch (InvalidDateException &e)
+		{
+			input_error(line, "Invalid input date", line_nr);
+			continue ;
+		}
+		inner >> amount;
+		if (!inner.eof() || inner.fail())
+		{
+			input_error(line, "Invalid input numeric", line_nr);
+			continue ;
+		}
+		if (amount > 1000.f)
+		{
+			input_error(line, "Input value too large!", line_nr);
+			continue ;
+		}
+		if (amount < 0.f)
+		{
+			input_error(line, "Input value can't be negative", line_nr);
+			continue ;
+		}
+		// TODO : for now, printHoldings checks whether date is in DB,
+		// might want to change that behaviour
+		printHoldings(this->_hash, converted_date, amount);
+	}
+	input.close();
+	return ;
+}
 
 bool	BitCoinExchange::initDatabase()
 {
@@ -29,7 +97,8 @@ bool	BitCoinExchange::initDatabase()
 			db_error(database, "Unexpected beginning of database", line_nr),
 			false
 		);
-	// TODO : refactor while into readEntireFile or similar (also used later)
+	// NOTE : we could refactor while into readEntireFile or similar
+	// (also used in input)
 	while (std::getline(database, line))
 	{
 		line_nr++;
@@ -60,6 +129,8 @@ bool	BitCoinExchange::initDatabase()
 	return (true);
 }
 
+// HELPER FUNCTIONS
+
 static bool	isLeapYear(int year)
 {
 	return ((year % 4 == 0)
@@ -70,7 +141,7 @@ static void dateAccept(std::stringstream &stream, char c)
 {
 	char	i;
 	if (stream.peek() == c)
-		stream >> i;
+		stream.read(&i, 1);
 	else
 		throw BitCoinExchange::InvalidDateException();
 }
@@ -107,6 +178,38 @@ static int	dateCheck(std::stringstream& date)
 		throw BitCoinExchange::InvalidDateException();
 	return (day + month * 100 + year * 100 * 100);
 }
+
+static void	printHoldings(std::map<int, float>& map, int date, float btc)
+{
+	std::map<int, float>::iterator it = map.lower_bound(date);
+	if (it == map.end()
+		|| (it == map.begin() && it->first != date))
+	{
+		std::cerr << "Error : Input date not in database" << std::endl;
+		return ;
+	}
+
+	if (it->first != date)
+		--it;
+	int day = date % 100;
+	int month = (date % 10000 - day) / 100;
+	int year = (date - day - month) / 10000;
+	
+	std::cout << year << "-"
+		<< month << "-"
+		<< day << " => "
+		<< btc << " = "
+		<< btc * it->second << std::endl;
+}
+
+static void	input_error(std::string &line, const std::string& msg,
+		int line_nr)
+{
+		std::cerr << "Error, line " << line_nr << ": " << msg << std::endl
+			<< "[\"" << line << "\"]"
+			<< std::endl;
+}
+
 
 static void	db_error(std::ifstream &db, const std::string& msg,
 		int line_nr)
