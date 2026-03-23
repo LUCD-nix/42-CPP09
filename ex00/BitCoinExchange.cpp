@@ -54,7 +54,7 @@ bool	BitCoinExchange::initDatabase()
 				db_error(database, "Invalid database price", line_nr),
 				false
 			);
-		_hash.insert(std::pair<int, int>(converted_date, price));
+		_hash.insert(std::pair<int, float>(converted_date, price));
 	}
 	database.close();
 	return (true);
