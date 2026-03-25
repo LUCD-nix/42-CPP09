@@ -2,6 +2,7 @@ data.csv
 a.out
 *.o
 btc
+RPN
 exercise*
 *test*
 *.txt
