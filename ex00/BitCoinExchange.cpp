@@ -69,7 +69,7 @@ void	BitCoinExchange::processInput()
 			input_error(line, "Input value can't be negative", line_nr);
 			continue ;
 		}
-		// TODO : for now, printHoldings checks whether date is in DB,
+		// TODO : for now, it is printHoldings that checks whether date is in DB,
 		// might want to change that behaviour
 		printHoldings(this->_hash, converted_date, amount);
 	}
@@ -203,19 +203,19 @@ static void	printHoldings(std::map<int, float>& map, int date, float btc)
 }
 
 static void	input_error(std::string &line, const std::string& msg,
-		int line_nr)
+						int line_nr)
 {
-		std::cerr << "Error, line " << line_nr << ": " << msg << std::endl
-			<< "[\"" << line << "\"]"
-			<< std::endl;
+	std::cerr << "Error, line " << line_nr << ": " << msg << std::endl
+	<< "[\"" << line << "\"]"
+	<< std::endl;
 }
 
 
 static void	db_error(std::ifstream &db, const std::string& msg,
-		int line_nr)
+					 int line_nr)
 {
-		db.close();
-		std::cerr << "BCE :" << msg << " line " << line_nr << std::endl;
+	db.close();
+	std::cerr << "BCE :" << msg << " line " << line_nr << std::endl;
 }
 
 

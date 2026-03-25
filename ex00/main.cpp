@@ -3,17 +3,17 @@
 
 int	main(int argc, char* argv[])
 {
-  if (argc != 2)
+	if (argc != 2)
 	{
-	  std::cerr << "Error, must provide input file!" << std::endl;
-	  return (1);
+		std::cerr << "Error, must provide input file!" << std::endl;
+		return (1);
 	}
-  std::string input_file_name(argv[1]);
-  BitCoinExchange	bce(input_file_name, "data.csv");
-  if (!bce.initDatabase())
+	std::string input_file_name(argv[1]);
+	BitCoinExchange	bce(input_file_name, "data.csv");
+	if (!bce.initDatabase())
 	{
-	  return (1);
+		return (1);
 	}
-  bce.processInput();
-  std::cout << "Success!";
+	bce.processInput();
+	std::cout << "Success!";
 }

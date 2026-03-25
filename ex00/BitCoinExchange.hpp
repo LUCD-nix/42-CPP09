@@ -18,9 +18,6 @@ class BitCoinExchange
 		BitCoinExchange& operator=(const BitCoinExchange& other);
 		// END ORTHODOX CANNONICAL FORM
 
-		class InvalidPriceException : public std::exception {
-			const char*	what() const throw(){return ("BCE: Bad Price!");};
-		};
 		class InvalidDateException : public std::exception {
 			const char*	what() const throw(){return ("BCE: Bad Date!");};
 		};
