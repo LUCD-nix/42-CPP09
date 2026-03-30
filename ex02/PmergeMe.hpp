@@ -22,8 +22,8 @@ public :
 	static bool	dequeIngestInput(int argc, char *argv[]);
 	static void	printVector();
 	static void	printDeque();
-	static void	sortVector();
-	static void	sortDeque();
+	static bool	sortVector();
+	static bool	sortDeque();
 
 private :
 	static void	appendToDeque(int a);

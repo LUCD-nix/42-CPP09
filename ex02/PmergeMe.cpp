@@ -75,16 +75,16 @@ void sortVecRecursive(std::size_t batch_size, std::vector<int>& cont)
 	// Base case
 	if (count == 0 || count == 1)
 		return ;
-	if (count == 2 && *(last - batch_size) > *first)
+	if (count == 2 && *(last - batch_size) < *first)
 	{
-		std::swap_ranges(first, first + batch_size, last);
+		std::swap_ranges(first, first + batch_size, first + batch_size);
 		return ;
 	}
 
 	// Form pairs
-	for (i = 0; i < dist; i += pair_size)
+	for (i = 0; i < n_pairs; i++)
 	{
-		VecIt left = first + i;
+		VecIt left = first + i * pair_size;
 		VecIt right = left + batch_size;
 		if (*left < *right)
 		{
@@ -117,10 +117,6 @@ void sortVecRecursive(std::size_t batch_size, std::vector<int>& cont)
 		losers.insert(losers.end(), loser, loser + batch_size);
 		cont.erase(loser, loser + batch_size);
 	}
-	if (count % 2)
-	{
-		losers.insert(losers.end(), leftover.begin(), leftover.end());
-	}
     for (i = 0; i < n_pairs - 1; i++)
 	{
 		VecIt search_to = cont.begin() + batch_size * (indices[i] + i);
@@ -132,18 +128,28 @@ void sortVecRecursive(std::size_t batch_size, std::vector<int>& cont)
 	}
 	if (count % 2)
 	{
-		VecIt to_insert = losers.end() - batch_size;
-		VecIt pos = stepBinarySearch(cont.begin(),
-									 cont.end(),
-									 batch_size,
-									 *to_insert);
-		cont.insert(pos, to_insert, to_insert + batch_size);
+		VecIt pos = stepBinarySearch(cont.begin(), cont.end(), batch_size,
+									 *leftover.begin());
+		cont.insert(pos, leftover.begin(), leftover.end());
 	}
 }
 
-void PmergeMe::sortVector()
+template <typename It>
+bool	is_sorted(It begin, It end)
+{
+	while (++begin != end)
+	{
+		// allow same
+		if (*begin < *(begin - 1))
+			return (false);
+	}
+	return (true);
+}
+
+bool PmergeMe::sortVector()
 {
 	sortVecRecursive(1, vec);
+	return (is_sorted(vec.begin(), vec.end()));
 }
 
 

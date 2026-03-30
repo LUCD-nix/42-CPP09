@@ -7,8 +7,11 @@ int	main(int argc, char* argv[])
 	{
 		return (1);
 	}
-	PmergeMe::sortVector();
+	if (!PmergeMe::sortVector())
+	{
+		std::cerr << "Error, vec not sorted" << std::endl;
+		return (1);
+	}
 	PmergeMe::printVector();
-	std::cout << "Success!";
+	std::cout << "Success!" << std::endl;
 }
-
