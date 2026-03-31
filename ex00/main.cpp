@@ -15,5 +15,5 @@ int	main(int argc, char* argv[])
 		return (1);
 	}
 	bce.processInput();
-	std::cout << "Success!";
+	std::cout << "Success!" << std::endl;
 }

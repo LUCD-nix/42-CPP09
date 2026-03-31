@@ -12,6 +12,6 @@ int	main(int argc, char* argv[])
 	ReversePolish	rpn;
 	if (!rpn.processString(input))
 		return (1);
-	std::cout << "Success!";
+	std::cout << "Success!" << std::endl;
 }
 

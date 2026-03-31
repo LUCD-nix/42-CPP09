@@ -8,7 +8,7 @@ int	main(int argc, char* argv[])
 	timeval start, end;
 	double elapsed;
 
-	// INGEST VECTOR
+	// INGEST VECTOR ----------------------------------------
 	gettimeofday(&start, NULL);
 	if (!PmergeMe::vecIngestInput(argc, argv))
 	{
@@ -17,10 +17,12 @@ int	main(int argc, char* argv[])
 	gettimeofday(&end, NULL);
 	elapsed = end.tv_sec - start.tv_sec + (end.tv_usec - start.tv_usec)
 												 / 1e6;
+	std::cout << "Unsorted : ";
+	PmergeMe::printVector();
 	std::cout << std::setprecision(6)
 		<< "Time to ingest data into vector : " << elapsed << "s" << std::endl;
 
-	// SORT VECTOR
+	// SORT VECTOR ----------------------------------------
 	gettimeofday(&start, NULL);
 	if (!PmergeMe::sortVector())
 	{
@@ -31,11 +33,11 @@ int	main(int argc, char* argv[])
 	elapsed = end.tv_sec - start.tv_sec + (end.tv_usec - start.tv_usec)
 												 / 1e6;
 	std::cout << std::setprecision(6)
-		<< "Time to sort vector :" << elapsed << "s" << std::endl;
+		<< "Time to sort vector : " << elapsed << "s" << std::endl;
 
 	PmergeMe::printVector();
 
-	// INGEST DEQUE
+	// INGEST DEQUE ----------------------------------------
 	gettimeofday(&start, NULL);
 	if (!PmergeMe::dequeIngestInput(argc, argv))
 	{
@@ -47,7 +49,7 @@ int	main(int argc, char* argv[])
 	std::cout << std::setprecision(6)
 		<< "Time to ingest data into deque : " << elapsed << "s" << std::endl;
 	
-	// SORT DEQUE
+	// SORT DEQUE ----------------------------------------
 	gettimeofday(&start, NULL);
 	if (!PmergeMe::sortDeque())
 	{
@@ -59,7 +61,7 @@ int	main(int argc, char* argv[])
 	elapsed = end.tv_sec - start.tv_sec + (end.tv_usec - start.tv_usec)
 												 / 1e6;
 	std::cout << std::setprecision(6)
-		<< "Time to sort deque :" << elapsed << "s" << std::endl;
+		<< "Time to sort deque : " << elapsed << "s" << std::endl;
 
 	PmergeMe::printDeque();
 	std::cout << "Success!" << std::endl;
