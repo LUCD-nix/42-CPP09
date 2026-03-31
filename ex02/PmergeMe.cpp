@@ -75,9 +75,10 @@ void sortVecRecursive(std::size_t batch_size, std::vector<int>& cont)
 	// Base case
 	if (count == 0 || count == 1)
 		return ;
-	if (count == 2 && *(last - batch_size) < *first)
+	if (count == 2)
 	{
-		std::swap_ranges(first, first + batch_size, first + batch_size);
+		if (*(last - batch_size) < *first)
+			std::swap_ranges(first, first + batch_size, first + batch_size);
 		return ;
 	}
 
@@ -147,9 +148,10 @@ void sortDequeRecursive(std::size_t batch_size, std::deque<int>& cont)
 	std::size_t i;
 	if (count == 0 || count == 1)
 		return ;
-	if (count == 2 && *(cont.end() - batch_size) < *cont.begin())
+	if (count == 2)
 	{
-		std::swap_ranges(cont.begin(), cont.begin() + batch_size, cont.begin() + batch_size);
+		if (*(cont.end() - batch_size) < *cont.begin())
+			std::swap_ranges(cont.begin(), cont.begin() + batch_size, cont.begin() + batch_size);
 		return ;
 	}
 	for (i = 0; i < n_pairs; i++)

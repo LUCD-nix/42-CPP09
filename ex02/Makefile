@@ -1,3 +1,4 @@
+# **************************************************************************** #
 #                                                                              #
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
@@ -17,7 +18,7 @@ CPPFILES = PmergeMe.cpp main.cpp
 
 OBJS := $(CPPFILES:.cpp=.o)
 
-CPP = g++
+CPP = c++
 
 CPPFLAGS =  -std=c++98 -Wall -Wextra -Werror -O3
 
