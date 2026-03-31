@@ -19,7 +19,7 @@ OBJS := $(CPPFILES:.cpp=.o)
 
 CPP = g++
 
-CPPFLAGS =  -std=c++98 -Wall -Wextra -Werror -ggdb3
+CPPFLAGS =  -std=c++98 -Wall -Wextra -Werror -O3
 
 all: ${NAME}
 

@@ -134,6 +134,69 @@ void sortVecRecursive(std::size_t batch_size, std::vector<int>& cont)
 	}
 }
 
+
+// Deque has cont.{begin/end}() spam because the iterators get invalidated if
+// they move, which is not the case with std::vector as the memory is contiguous
+typedef std::deque<int>::iterator DequeIt;
+void sortDequeRecursive(std::size_t batch_size, std::deque<int>& cont)
+{
+	std::size_t dist = std::distance(cont.begin(), cont.end());
+	std::size_t	count = dist / batch_size;
+	std::size_t	n_pairs = count / 2;
+	std::size_t pair_size = batch_size * 2;
+	std::size_t i;
+	if (count == 0 || count == 1)
+		return ;
+	if (count == 2 && *(cont.end() - batch_size) < *cont.begin())
+	{
+		std::swap_ranges(cont.begin(), cont.begin() + batch_size, cont.begin() + batch_size);
+		return ;
+	}
+	for (i = 0; i < n_pairs; i++)
+	{
+		DequeIt left = cont.begin() + i * pair_size;
+		DequeIt right = left + batch_size;
+		if (*left < *right)
+		{
+			std::swap_ranges(left, left + batch_size, right);
+		}
+	}
+	std::deque<int> leftover(batch_size);
+	leftover.clear();
+	if (count % 2)
+	{
+		leftover.insert(leftover.end(), cont.end() - batch_size, cont.end());
+		cont.erase(cont.end() - batch_size, cont.end());
+	}
+	sortDequeRecursive(pair_size, cont);
+	std::swap_ranges(cont.begin() + batch_size, cont.begin() + pair_size, cont.begin());
+	std::vector<int> indices = jacobsthalBatchingIndices(n_pairs - 1);
+	std::deque<int> losers(n_pairs * batch_size);
+    losers.clear();
+    for (i = 0; i < n_pairs - 1; i++)
+	{
+		DequeIt winner = cont.begin() + pair_size + batch_size * i;
+		DequeIt loser = winner + batch_size;
+		losers.insert(losers.end(), loser, loser + batch_size);
+		cont.erase(loser, loser + batch_size);
+	}
+    for (i = 0; i < n_pairs - 1; i++)
+	{
+		DequeIt search_to = cont.begin() + batch_size * (indices[i] + i);
+		DequeIt to_insert = losers.begin() + (indices[i] - 3) * batch_size;
+		DequeIt pos = stepBinarySearch(cont.begin(),
+						 search_to, batch_size,
+						 *to_insert);
+		cont.insert(pos, to_insert, to_insert + batch_size);
+	}
+	if (count % 2)
+	{
+		DequeIt pos = stepBinarySearch(cont.begin(), cont.end(), batch_size,
+									 *leftover.begin());
+		cont.insert(pos, leftover.begin(), leftover.end());
+	}
+}
+
 template <typename It>
 bool	is_sorted(It begin, It end)
 {
@@ -152,6 +215,11 @@ bool PmergeMe::sortVector()
 	return (is_sorted(vec.begin(), vec.end()));
 }
 
+bool PmergeMe::sortDeque()
+{
+	sortDequeRecursive(1, deque);
+	return (is_sorted(deque.begin(), deque.end()));
+}
 
 
 // Common input checking to both
@@ -193,6 +261,19 @@ void PmergeMe::printVector()
 
 	std::cout << "{ ";
 	while (it != vec.end())
+	{
+		std::cout << *it << " ";
+		it++;
+	}
+	std::cout << "}" << std::endl;
+}
+
+void PmergeMe::printDeque()
+{
+	DequeIt it = deque.begin();
+
+	std::cout << "{ ";
+	while (it != deque.end())
 	{
 		std::cout << *it << " ";
 		it++;
