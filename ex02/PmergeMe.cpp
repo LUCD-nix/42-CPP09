@@ -228,7 +228,12 @@ bool PmergeMe::sortDeque()
 static bool ingestInput(int argc, char *argv[], void (*append)(int))
 {
 	int	i, temp;
-	
+
+	if (argc == 1)
+	{
+		std::cerr << "PmergeMe: Input cannot be empty!" << std::endl;
+		return (false);
+	}
 	for (i = 1; i < argc; i++)
 	{
 		// Input format: One positive integer per char* in argv
